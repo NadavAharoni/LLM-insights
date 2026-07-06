@@ -18,7 +18,7 @@ CONFIG = dict(
     n_cells=5,              # vector components per token (cells per rod)
     rod_w=26, rod_h=120,    # token rod size
     n_input=6,
-    input_x0=70,
+    input_x0=170,
     input_gap=58,
     machine_x=560, machine_w=250, machine_h=210,
     n_output=4,
@@ -158,7 +158,9 @@ def build():
 
     # arrow into machine
     feed_start = input_xs[-1] + rw + 12
-    svg.append(arrow(feed_start, cy, C["machine_x"] - 12, cy))
+    feed_end = C["machine_x"] - 12
+    feed_mid = (feed_start + feed_end) / 2
+    svg.append(arrow(feed_start, cy, feed_end, cy))
 
     # machine
     mx, mw, mh = C["machine_x"], C["machine_w"], C["machine_h"]
@@ -195,14 +197,19 @@ def build():
     if C["show_feedback"]:
         sx = out_xs[0] + rw / 2
         sy = rod_top - 28
-        ex = feed_start + 6
+        ex = feed_mid
         ey = rod_top - 6
-        top = my - 56
+        top = my - 24
+        r = 12
         svg.append(
-            f'<path d="M{sx:.1f},{sy:.1f} C{sx:.1f},{top:.1f} {ex:.1f},{top:.1f} {ex:.1f},{ey:.1f}" '
+            f'<path d="M{sx:.1f},{sy:.1f} L{sx:.1f},{top + r:.1f} '
+            f'Q{sx:.1f},{top:.1f} {sx - r:.1f},{top:.1f} '
+            f'L{ex + r:.1f},{top:.1f} '
+            f'Q{ex:.1f},{top:.1f} {ex:.1f},{top + r:.1f} '
+            f'L{ex:.1f},{ey:.1f}" '
             f'fill="none" stroke="{P["muted"]}" stroke-width="2" stroke-dasharray="8 7"/>'
         )
-        svg.append(arrow(ex, top + 18, ex, ey, color=P["muted"], width=2, head=10))
+        svg.append(arrow(ex, top + r + 6, ex, ey, color=P["muted"], width=2, head=10))
         svg.append(text((sx + ex) / 2, top - 8,
                         "each emitted token is appended, then the whole sequence is read again",
                         size=12.5, color=P["muted"], italic=True))
